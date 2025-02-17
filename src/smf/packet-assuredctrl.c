@@ -46,7 +46,6 @@
 void proto_reg_handoff_assuredctrl(void);
 
 /* Initialize the protocol and registered fields */
-static int hf_assuredctrl_8_bit_field  = -1;
 static int hf_assuredctrl_16_bit_field = -1;
 static int hf_assuredctrl_32_bit_field = -1;
 static int hf_assuredctrl_64_bit_field = -1;
@@ -696,19 +695,6 @@ static void redelivery_delay_back_off_multiplier_format(gchar* s, uint16_t v)
 }
 
 /* ---------- Byte Accessor Helper Functions ----------- */
-static int get_8_bit_value (
-    proto_tree *tree,
-    tvbuff_t *tvb,
-    int offset,
-    char const * const field_name)
-{
-    uint8_t value = tvb_get_uint8(tvb, offset);                 /* gets value of the 8-bit field */
-    proto_tree_add_string_format(                               /* adds formatted string to proto tree*/
-        tree, hf_assuredctrl_8_bit_field, tvb, offset, 1, NULL, "%s: %d", field_name, value
-    );
-    return 1;                                                   /* returns the number of bytes processed */      
-}
-
 static int get_16_bit_value (
     proto_tree *tree,
     tvbuff_t *tvb,
@@ -809,7 +795,7 @@ static char* custom_tvb_bytes_to_str(wmem_allocator_t *scope, tvbuff_t *tvb, con
 
     int pos = 0;
     for (int i = 0; i < len; i++) {
-        pos += sprintf(&str[pos], "%02x", tvb_get_guint8(tvb, offset + i));
+        pos += sprintf(&str[pos], "%02x", tvb_get_uint8(tvb, offset + i));
     }
     str[pos] = '\0'; // Null-terminate the string
 
@@ -1295,7 +1281,6 @@ static int add_assuredCtrl_msgIdList_item (
 {
     int old_offset = offset;
     uint32_t msgIdCount = 0;
-    uint64_t msgId = 0;
     unsigned int i = 0;
     int len;
 
@@ -1306,7 +1291,6 @@ static int add_assuredCtrl_msgIdList_item (
     proto_tree_add_item(tree, hf_assuredctrl_msgIdType, tvb, offset, len=1, false);
     offset += len;
 
-    /* Cannot call get_64_bit_value because of special formatting (i.e. MsgId[%d]) */
     for (i=0; i<msgIdCount; i++) {
         proto_tree_add_item(tree, hf_assuredctrl_msgId, tvb, offset, len=8, false);
         offset += len;
@@ -1368,10 +1352,8 @@ static int add_assuredCtrl_externalAckList_item (
 }
 
 static void add_assuredCtrl_txnResponse_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1391,10 +1373,8 @@ static void add_assuredCtrl_txnResponse_item (
 }
 
 static void add_assuredCtrl_syncPrepareRequest_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1420,10 +1400,8 @@ static void add_assuredCtrl_syncPrepareRequest_item (
 }
 
 static void add_assuredCtrl_asyncCommitRequest_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1440,10 +1418,8 @@ static void add_assuredCtrl_asyncCommitRequest_item (
 }
 
 static void add_assuredCtrl_syncCommitRequest_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1462,10 +1438,8 @@ static void add_assuredCtrl_syncCommitRequest_item (
 }
 
 static void add_assuredCtrl_syncCommitStart_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1491,10 +1465,8 @@ static void add_assuredCtrl_syncCommitStart_item (
 }
 
 static void add_assuredCtrl_syncCommitEnd_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1510,10 +1482,8 @@ static void add_assuredCtrl_syncCommitEnd_item (
 }
 
 static void add_assuredCtrl_syncRespoolRequest_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1531,10 +1501,8 @@ static void add_assuredCtrl_syncRespoolRequest_item (
 }
 
 static void add_assuredCtrl_asyncRollbackRequest_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1551,10 +1519,8 @@ static void add_assuredCtrl_asyncRollbackRequest_item (
 }
 
 static void add_assuredCtrl_syncUncommitRequest_item (
-    proto_tree *tree,
     tvbuff_t *tvb,
     int offset,
-    int size,
     proto_item *item)
 {
     proto_tree* sub_tree;
@@ -1650,39 +1616,39 @@ static void add_assuredCtrl_payload_param_txn_item (
     switch (msgType)
     {
         case ASSUREDCTRL_TXNMSGTYPE_TXN_RESPONSE:
-            add_assuredCtrl_txnResponse_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_txnResponse_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_SYNC_PREPARE_REQUEST:
-            add_assuredCtrl_syncPrepareRequest_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_syncPrepareRequest_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_ASYNC_COMMIT_REQUEST:
-            add_assuredCtrl_asyncCommitRequest_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_asyncCommitRequest_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_SYNC_COMMIT_REQUEST:
-            add_assuredCtrl_syncCommitRequest_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_syncCommitRequest_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_SYNC_COMMIT_START:
-            add_assuredCtrl_syncCommitStart_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_syncCommitStart_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_SYNC_COMMIT_END:
-            add_assuredCtrl_syncCommitEnd_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_syncCommitEnd_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_SYNC_RESPOOL_REQUEST:
-            add_assuredCtrl_syncRespoolRequest_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_syncRespoolRequest_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_ASYNC_ROLLBACK_REQUEST:
-            add_assuredCtrl_asyncRollbackRequest_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_asyncRollbackRequest_item(tvb, offset, item);
             break;
         
         case ASSUREDCTRL_TXNMSGTYPE_SYNC_UNCOMMIT_REQUEST:
-            add_assuredCtrl_syncUncommitRequest_item(tree, tvb, offset, size, item);
+            add_assuredCtrl_syncUncommitRequest_item(tvb, offset, item);
             break;
         
         default:
@@ -1913,7 +1879,7 @@ add_assuredctrl_param(
             if (version < 3) { msg_type = (tvb_get_uint8(tvb, 1) & 0xf0) >> 4; }
             else { msg_type = tvb_get_uint8(tvb, 1); }
 
-            windowSize = tvb_get_guint8(tvb, offset);
+            windowSize = tvb_get_uint8(tvb, offset);
             item = proto_tree_add_item(tree,
                 hf_assuredctrl_window_size_param,
                 tvb, offset, size, false);
@@ -2612,10 +2578,6 @@ proto_register_assuredctrl(void)
 
 /* Setup list of header fields  See Section 1.6.1 for details*/
     static hf_register_info hf[] = {
-        { &hf_assuredctrl_8_bit_field,
-            { "Field_8", "assuredctrl.discard",
-            FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL }
-        },
         { &hf_assuredctrl_16_bit_field,
             { "Field_16", "assuredctrl.discard",
             FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL }
