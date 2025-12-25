@@ -3,6 +3,15 @@
 cmake_minimum_required(VERSION 3.16)
 project(smf DESCRIPTION "SMF Wireshark Plugin" LANGUAGES C)
 
+if((DEFINED PLUGIN_VERSION_MAJOR AND NOT DEFINED PLUGIN_VERSION_MINOR) OR 
+   (NOT DEFINED PLUGIN_VERSION_MAJOR AND DEFINED PLUGIN_VERSION_MINOR))
+    message(FATAL_ERROR "Invalid Configuration: You must define BOTH PLUGIN_VERSION_MAJOR and PLUGIN_VERSION_MINOR, or NEITHER.")
+endif()
+
+if(DEFINED PLUGIN_VERSION_PATCH AND NOT DEFINED PLUGIN_VERSION_MAJOR)
+    message(FATAL_ERROR "Invalid Configuration: PLUGIN_VERSION_PATCH is defined, but PLUGIN_VERSION_MAJOR/MINOR are missing.")
+endif()
+
 include(cmake/SetupWiresharkSDK.cmake)
 
 find_package(Wireshark CONFIG REQUIRED)
