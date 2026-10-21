@@ -265,7 +265,7 @@ dissect_smrp_parms(tvbuff_t *tvb, packet_info *pinfo _U_, proto_tree *smrp_tree,
      }
 
      // Make sure there is actually enough data
-     if (tvb_captured_length_remaining(tvb, offset) < parm_len) {
+     if (parm_len < 0 || tvb_captured_length_remaining(tvb, offset) < parm_len) {
          proto_tree_add_item(smrp_tree, hf_smrp_parm_bad_format, tvb, offset, -1, false);
          return numParms;
      }
