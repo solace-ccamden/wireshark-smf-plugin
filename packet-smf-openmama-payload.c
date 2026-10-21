@@ -583,7 +583,11 @@ dissect_mama_fields(
 
     for (offset=field_offset_start; offset<field_offset_end; )
     {
-        offset += dissect_mama_field(tvb, offset, tree, pinfo);
+        int field_len = dissect_mama_field(tvb, offset, tree, pinfo);
+        if (field_len <= 0) {
+            break;
+        }
+        offset += field_len;
     }
 }
 
