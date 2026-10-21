@@ -1217,7 +1217,8 @@ static void add_assuredCtrl_xaRecoverRequest_item (
         scanCursorLen = tvb_get_ntohl(tvb, offset);
         offset += get_32_bit_value(sub_tree, tvb, offset, "ScanCursorLength");
         proto_tree_add_item(sub_tree,
-            hf_assuredctrl_scanCursorData, tvb, offset++, scanCursorLen, false);
+            hf_assuredctrl_scanCursorData, tvb, offset, scanCursorLen, false);
+        offset += scanCursorLen;
     }
 }
 
