@@ -1214,6 +1214,7 @@ static void add_assuredCtrl_xaRecoverRequest_item (
     offset += get_32_bit_value(sub_tree, tvb, offset, "MaxNumIDs");
 
     if (flags & 0x01) {
+        scanCursorLen = tvb_get_ntohl(tvb, offset);
         offset += get_32_bit_value(sub_tree, tvb, offset, "ScanCursorLength");
         proto_tree_add_item(sub_tree,
             hf_assuredctrl_scanCursorData, tvb, offset++, scanCursorLen, false);
@@ -2506,8 +2507,8 @@ dissect_assuredctrl_params(
     for (offset=param_offset_start; offset<param_offset_end; )
     {
         int param_len = dissect_assuredctrl_param(tvb, pinfo, offset, tree, str_transactionctrl_msgtype);
-        if (0 == param_len) {
-            // A param cannot be 0 length. Something went wrong with the dissection. Just exit
+        if (param_len <= 0) {
+            // A param cannot be 0 or negative length. Something went wrong with the dissection. Just exit
             break;
         }
         offset += param_len;

@@ -360,6 +360,9 @@ clientctrl_dissect_rtr_capabilities_param(
         for (; non_bool_cap_offset < non_bool_caps_end;) {
             non_bool_cap_type = tvb_get_uint8(tvb, non_bool_cap_offset);
             non_bool_cap_length = tvb_get_ntohl(tvb, non_bool_cap_offset + 1);
+            if (non_bool_cap_length < 5) {
+                break;
+            }
             add_clientctrl_rtr_cap_extended_param(cap_tree, non_bool_cap_type, tvb, non_bool_cap_offset + 5);
             non_bool_cap_offset += non_bool_cap_length;
         }
@@ -370,6 +373,9 @@ clientctrl_dissect_rtr_capabilities_param(
         for (; non_bool_cap_offset < non_bool_caps_end;) {
             non_bool_cap_type = tvb_get_uint8(tvb, non_bool_cap_offset);
             non_bool_cap_length = tvb_get_ntohl(tvb, non_bool_cap_offset + 1);
+            if (non_bool_cap_length < 5) {
+                break;
+            }
             proto_tree_add_item(cap_tree, rtrcaps[non_bool_cap_type], tvb, non_bool_cap_offset + 5, non_bool_cap_length - 5, false);
             non_bool_cap_offset += non_bool_cap_length;
         }

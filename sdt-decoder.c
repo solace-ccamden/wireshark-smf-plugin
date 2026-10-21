@@ -111,6 +111,9 @@ void get_embedded_smf_info(tvbuff_t* tvb, int offset, int length, int* embedded_
         }
 
         payloadlen = itemlen - taglen - 1; /* Just the item payload */
+        if (payloadlen < 0) {
+            break;
+        }
         pos += taglen; /* pos now points to beginning of payload */
 
                 /* If it's a stream, call recursively to check contents */
@@ -241,6 +244,9 @@ add_sdt_block(proto_tree *bm_tree, packet_info* pinfo, int headerFieldIndex, tvb
                 break;
         }
         payloadlen = itemlen - taglen - 1; /* Just the item payload */
+        if (payloadlen < 0) {
+            break;
+        }
         pos += taglen; /* pos now points to beginning of payload */
         //payload_offset = taglen + 1;
 
